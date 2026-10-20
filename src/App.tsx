@@ -52,11 +52,11 @@ type SortDir = "asc" | "desc";
 const GAME_FILTERS: SongGame[] = ["maimai", "CHUNITHM", "ONGEKI"];
 
 const RARITY_FILTERS = [
-  { className: "rarity-common", name: "Commune" },
+  { className: "rarity-common", name: "Common" },
   { className: "rarity-rare", name: "Rare" },
   { className: "rarity-super-rare", name: "Super rare" },
   { className: "rarity-ultra-rare", name: "Ultra rare" },
-  { className: "rarity-legendary", name: "Légendaire" },
+  { className: "rarity-legendary", name: "Legendary" },
   { className: "rarity-mythical", name: "Mythical" },
   { className: "rarity-unknown", name: "Unknown" },
 ];
@@ -1536,11 +1536,28 @@ export default function App() {
                           {String(lastPack.length).padStart(2, "0")}
                         </span>
 
-                        <SongCard
-                          song={currentSong}
-                          rarity={getSongRarity(currentSong)}
-                          playcount={getSongPlaycount(currentSong)}
-                        />
+                      <div className="pack-card-preview-content">
+                      <SongCard
+                        song={currentSong}
+                        rarity={getSongRarity(currentSong)}
+                        playcount={getSongPlaycount(currentSong)}
+                        onPreview={() => setSelectedSong(currentSong)}
+                      />
+
+                        {currentSong.wikiUrl && (
+                          <div className="pack-card-preview-actions">
+                            <a
+                              className="song-preview-remywiki"
+                              href={currentSong.wikiUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              View on RemyWiki ↗
+                            </a>
+                          </div>
+                        )}
+                      </div>
 
                         <span className="drawn-card-label">
                           Copies owned: {collection[keyOf(currentSong)] ?? 0}
@@ -1788,13 +1805,54 @@ export default function App() {
         </section>
       )}
 
-      {/* Collection card backdrop */}
+      {/* Collection card preview */}
       {selectedSong && (
         <div
           className="song-preview-backdrop"
           onClick={() => setSelectedSong(null)}
-          aria-label="Close card preview"
-        />
+          role="presentation"
+        >
+          <section
+            className="song-preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Preview of ${selectedSong.title}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="song-preview-close"
+              onClick={() => setSelectedSong(null)}
+              aria-label="Close preview"
+            >
+              ×
+            </button>
+
+            <div className="song-preview-content">
+              <div className="song-preview-card">
+                <SongCard
+                  song={selectedSong}
+                  count={collection[keyOf(selectedSong)]}
+                  rarity={getSongRarity(selectedSong)}
+                  playcount={getSongPlaycount(selectedSong)}
+                />
+              </div>
+
+              <div className="song-preview-actions">
+                <a
+                  className="song-preview-remywiki"
+                  href={`https://remywiki.com/${encodeURIComponent(
+                    selectedSong.title.replace(/ /g, "_")
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on RemyWiki ↗
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
       )}
 
       {/* Drop rates popup */}
